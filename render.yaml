@@ -1,0 +1,18 @@
+# Render Blueprint：把本仓库部署到 Render（后端在 server/ 子目录）
+services:
+  - type: web
+    name: exam-system-api
+    runtime: node
+    rootDir: server
+    buildCommand: npm install
+    startCommand: node src/index.js
+    plan: free
+    envVars:
+      - key: JWT_SECRET
+        sync: false # 在 Render 控制台手动填写
+      - key: DATABASE_URL
+        sync: false # 在 Render 控制台手动填写 Supabase 连接串
+      - key: DB_SSL
+        value: "true"
+      - key: CORS_ORIGIN
+        sync: false # 填写前端域名，如 https://your-app.vercel.app
