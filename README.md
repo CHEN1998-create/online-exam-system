@@ -101,45 +101,40 @@ npm run dev
 ### 配置 Supabase
 
 1. 到 [supabase.com](https://supabase.com) 创建项目
-2. 进入 **SQL Editor**，粘贴执行 `server/src/db/schema.sql`（建表 SQL）
-3. 到 **Settings → Database → Connection string** 复制连接串（选 `Node.js` 或 `URI` 格式）
-4. 把连接串填到后端 `DATABASE_URL`
+2. 项目首页点 **「Connect」** 按钮 → 选 **「Transaction pooler」** → 复制 **URI** 连接串
+3. 把连接串填到后端 `DATABASE_URL`
 
-> 后端启动时会自动建表（幂等）并在用户表为空时写入演示账号，所以第 2 步也可跳过。
+> 后端启动时会自动建表（建表 SQL 已内联在代码里）并在用户表为空时写入演示账号。
 
-## 部署
+## 部署（Vercel + Supabase）
 
-### 前端 → Vercel / Zeabur
+前端（Next.js）和后端（Express，通过 serverless-http 包装成 Next.js API 路由）**一起部署到 Vercel**，数据库用 Supabase。
 
-Next.js 前端，平台自动检测：
+### 1. 推送代码到 GitHub
 
-1. 把仓库推送到 GitHub
-2. **Vercel**：Import 仓库 → 框架自动识别 Next.js → 部署
-3. **Zeabur**：Import 仓库 → 选择 Next.js 服务 → 部署
-4. 在平台环境变量里设置：`NEXT_PUBLIC_API_BASE_URL = https://你的后端域名`
-
-### 后端 → Zeabur / Railway / Render
-
-仓库根目录是前端，后端在 `server/` 子目录，部署时**指定根目录为 `server`**：
-
-- **Zeabur**：Import 仓库 → 服务根目录选 `server` → Node.js 服务
-- **Railway**：Import 仓库 → 项目设置里把根目录设为 `server`（或用 `server/Procfile` 的 `web: node src/index.js`）
-- **Render**：仓库根已提供 `render.yaml`（`rootDir: server`），在 Render 用 **Blueprint** 一键部署
-
-后端环境变量（平台控制台填写）：
-
-```
-JWT_SECRET        = 一段长随机字符串
-DATABASE_URL      = Supabase 连接串
-CORS_ORIGIN       = https://你的前端域名
-DB_SSL            = true
+```bash
+git push
 ```
 
-### 上线后核对
+### 2. 部署到 Vercel
 
-1. 前端 `NEXT_PUBLIC_API_BASE_URL` 指向后端域名
-2. 后端 `CORS_ORIGIN` 指向前端域名（否则浏览器跨域拦截）
-3. 后端 `DATABASE_URL` 指向 Supabase（否则内存模式，重启丢数据）
+1. [vercel.com](https://vercel.com) → 用 GitHub 登录 → **Add New → Project** → Import 仓库
+2. 框架自动识别 Next.js → Deploy
+
+### 3. 配置环境变量（Vercel → Settings → Environment Variables）
+
+| 变量 | 值 |
+|------|-----|
+| `JWT_SECRET` | 一段长随机字符串 |
+| `DATABASE_URL` | Supabase 的 **Transaction pooler** 连接串（形如 `postgresql://...pooler.supabase.com:6543/postgres`） |
+| `DB_SSL` | `true` |
+
+> ⚠️ 不要设置 `NEXT_PUBLIC_API_BASE_URL`，前端会自动用同源相对路径访问 `/api/*`（前后端同域）。
+
+### 4. 上线后核对
+
+1. 打开 Vercel 域名，用 `admin@demo.com / 123456` 登录
+2. 新建题目/考试后刷新仍在 → 数据已持久化到 Supabase
 
 ## 测试
 
