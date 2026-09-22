@@ -47,21 +47,24 @@
 
 ## 本地快速开始
 
-### 1. 启动后端（端口 4000）
+### 1. 安装依赖（前端 + 后端统一在根目录）
 
 ```bash
-cd server
 npm install
-copy .env.example .env        # Windows；Mac/Linux 用 cp
-npm run dev                    # 或 npm start
+```
+
+### 2. 启动后端（端口 4000）
+
+```bash
+copy server\.env.example server\.env    # Windows；Mac/Linux 用 cp
+npm run server:dev                      # 开发模式（热重载）；或 npm run server:start
 ```
 
 > 未设置 `DATABASE_URL` 时使用**内存存储**（重启即重置），适合本地开发。
 
-### 2. 启动前端（端口 3000）
+### 3. 启动前端（端口 3000）
 
 ```bash
-npm install
 copy .env.example .env.local   # Windows；Mac/Linux 用 cp
 npm run dev
 ```
