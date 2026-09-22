@@ -1,2 +1,0 @@
-health: 200 {"success":true,"message":"OK","data":{"ok":true}}
-登录: role=admin

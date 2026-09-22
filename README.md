@@ -2,6 +2,26 @@
 
 支持学生在线答题、管理员出卷、题库维护、提交记录与成绩统计的在线考试系统。
 
+## 在线演示与交付信息
+
+- **在线演示**：https://online-exam-system-six-delta.vercel.app/
+- **源码仓库**：https://github.com/CHEN1998-create/online-exam-system
+- **PRD 文档**：仓库根目录 `PRD (1).md`
+
+### 演示账号
+
+| 角色 | 账号 | 密码 |
+|------|------|------|
+| 学生 | `student@demo.com` | `123456` |
+| 管理员 | `admin@demo.com` | `123456` |
+
+### 核心功能
+
+- 登录鉴权 + 学生/管理员角色权限隔离
+- 学生端：考试列表 → 答题（倒计时、答题卡、单选/判断/简答）→ 提交 → 成绩
+- 自动判分（单选/判断），简答题人工复核
+- 管理端：概览统计、题库增删改查、考试创建/发布、提交记录查看/复核
+
 ## 技术栈
 
 - **前端**：Next.js 15（App Router）+ TypeScript + Tailwind CSS + shadcn/ui
