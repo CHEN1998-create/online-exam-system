@@ -7,14 +7,12 @@ import { GraduationCap, ShieldCheck } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { saveAuth } from "@/lib/auth";
+import { api } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 type Role = "student" | "admin";
-
-const API_BASE =
-  process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:4000";
 
 export function LoginForm({ initialRole }: { initialRole: Role }) {
   const router = useRouter();
@@ -31,22 +29,16 @@ export function LoginForm({ initialRole }: { initialRole: Role }) {
     setError("");
     setLoading(true);
     try {
-      const res = await fetch(`${API_BASE}/api/auth/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        setError(data.message || "登录失败，请检查邮箱和密码");
-        return;
-      }
+      const data = await api.post<{ token: string; user: { role: string } }>(
+        "/api/auth/login",
+        { email, password }
+      );
       // 保存登录态（token + 角色）到 cookie，middleware 会读取做页面守卫
       saveAuth(data.token, data.user.role);
       // 以服务器返回的角色为准跳转
       router.push(data.user.role === "admin" ? "/admin" : "/student/exams");
-    } catch {
-      setError("无法连接服务器，请确认后端已启动");
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "无法连接服务器，请确认后端已启动");
     } finally {
       setLoading(false);
     }
