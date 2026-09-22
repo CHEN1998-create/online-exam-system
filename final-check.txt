@@ -1,0 +1,2 @@
+管理员登录: role=admin 有token=True
+学生登录: role=student

@@ -1,7 +1,52 @@
 const { Pool } = require("pg");
 const bcrypt = require("bcryptjs");
-const fs = require("fs");
-const path = require("path");
+
+// 建表 SQL（内联在代码里，避免 serverless 部署时读不到 schema.sql 文件）
+const CREATE_TABLES_SQL = `
+CREATE TABLE IF NOT EXISTS users (
+  id TEXT PRIMARY KEY,
+  name TEXT NOT NULL,
+  email TEXT UNIQUE NOT NULL,
+  password_hash TEXT NOT NULL,
+  role TEXT NOT NULL CHECK (role IN ('student', 'admin'))
+);
+
+CREATE TABLE IF NOT EXISTS questions (
+  id TEXT PRIMARY KEY,
+  type TEXT NOT NULL CHECK (type IN ('single', 'judge', 'short')),
+  stem TEXT NOT NULL,
+  options JSONB NOT NULL DEFAULT '[]',
+  answer TEXT NOT NULL DEFAULT '',
+  score INTEGER NOT NULL DEFAULT 0,
+  category TEXT DEFAULT '',
+  difficulty TEXT DEFAULT 'easy'
+);
+
+CREATE TABLE IF NOT EXISTS exams (
+  id TEXT PRIMARY KEY,
+  title TEXT NOT NULL,
+  description TEXT DEFAULT '',
+  duration_minutes INTEGER NOT NULL DEFAULT 60,
+  status TEXT NOT NULL DEFAULT 'draft',
+  total_score INTEGER NOT NULL DEFAULT 0,
+  question_ids JSONB NOT NULL DEFAULT '[]',
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS submissions (
+  id TEXT PRIMARY KEY,
+  exam_id TEXT NOT NULL REFERENCES exams(id),
+  student_id TEXT NOT NULL REFERENCES users(id),
+  status TEXT NOT NULL DEFAULT 'in_progress',
+  reviewed BOOLEAN NOT NULL DEFAULT false,
+  answers JSONB NOT NULL DEFAULT '[]',
+  objective_score INTEGER NOT NULL DEFAULT 0,
+  score INTEGER,
+  submitted_at TIMESTAMPTZ,
+  reviewed_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+`;
 
 let pool;
 
@@ -22,8 +67,7 @@ function getPool() {
 // 建表 + 首次种子
 async function init() {
   const p = getPool();
-  const schema = fs.readFileSync(path.join(__dirname, "schema.sql"), "utf8");
-  await p.query(schema);
+  await p.query(CREATE_TABLES_SQL);
 
   const { rowCount } = await p.query("SELECT 1 FROM users LIMIT 1");
   if (rowCount === 0) {
