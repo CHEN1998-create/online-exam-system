@@ -1,6 +1,6 @@
 // 统一 API 客户端：自动附加 JWT token，解析统一 JSON 结构
-const API_BASE =
-  process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:4000";
+// API_BASE：本地开发填 http://localhost:4000；部署到 Vercel 时留空（用相对路径，同源）
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || "";
 
 function getToken(): string | undefined {
   if (typeof document === "undefined") return undefined;
