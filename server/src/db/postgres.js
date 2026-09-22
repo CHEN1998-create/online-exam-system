@@ -1,5 +1,6 @@
 const { Pool } = require("pg");
 const bcrypt = require("bcryptjs");
+const seed = require("./seed");
 
 // 建表 SQL（内联在代码里，避免 serverless 部署时读不到 schema.sql 文件）
 const CREATE_TABLES_SQL = `
@@ -80,6 +81,36 @@ async function init() {
         "u-admin", "管理员", "admin@demo.com", hash,
       ]
     );
+  }
+
+  // 首次部署时 seed 题目（与内存模式一致）
+  const qCheck = await p.query("SELECT 1 FROM questions LIMIT 1");
+  if (qCheck.rowCount === 0) {
+    for (const q of seed.questions) {
+      await p.query(
+        `INSERT INTO questions (id, type, stem, options, answer, score, category, difficulty)
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8)`,
+        [
+          q.id, q.type, q.stem, JSON.stringify(q.options),
+          q.answer, q.score, q.category, q.difficulty,
+        ]
+      );
+    }
+  }
+
+  // 首次部署时 seed 考试（与内存模式一致）
+  const eCheck = await p.query("SELECT 1 FROM exams LIMIT 1");
+  if (eCheck.rowCount === 0) {
+    for (const e of seed.exams) {
+      await p.query(
+        `INSERT INTO exams (id, title, description, duration_minutes, status, total_score, question_ids)
+         VALUES ($1,$2,$3,$4,$5,$6,$7)`,
+        [
+          e.id, e.title, e.description, e.durationMinutes,
+          e.status, e.totalScore, JSON.stringify(e.questionIds),
+        ]
+      );
+    }
   }
 }
 
