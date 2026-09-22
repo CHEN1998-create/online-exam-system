@@ -1,6 +1,8 @@
 // 统一 API 客户端：自动附加 JWT token，解析统一 JSON 结构
-// API_BASE：本地开发填 http://localhost:4000；部署到 Vercel 时留空（用相对路径，同源）
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || "";
+// API_BASE 永远为空（相对路径，同源请求）：
+// 本地和线上都由 Next.js 的 /api 路由（src/app/api/[...path]/route.js）统一处理，
+// 不再依赖 NEXT_PUBLIC_API_BASE_URL，彻底避免构建时把 localhost 写死进代码的问题。
+const API_BASE = "";
 
 function getToken(): string | undefined {
   if (typeof document === "undefined") return undefined;
